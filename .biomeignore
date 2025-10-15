@@ -1,0 +1,11 @@
+# Build output
+dist
+*.log
+
+# Dependencies
+node_modules
+bun.lockb
+
+# Docker
+Dockerfile
+docker-compose.yml
