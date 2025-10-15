@@ -79,6 +79,7 @@ const PORT = process.env.PORT || 3000
 const server = Bun.serve({
   port: PORT,
   fetch: app.fetch,
+  reusePort: true, // Linux에서 멀티 프로세스 로드 밸런싱 (macOS/Windows는 무시됨)
   development: {
     hmr: true,
     console: true,
