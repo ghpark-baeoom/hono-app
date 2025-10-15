@@ -17,28 +17,31 @@
 
 ## 🛠️ 기술 스택
 
-| 구분 | 기술 | 버전 | 설명 |
-|------|------|------|------|
-| **런타임** | [Bun](https://bun.sh) | 1.3+ | 빠른 JavaScript 런타임 (Node.js 대체) |
-| **프레임워크** | [Hono](https://hono.dev) | 4.9+ | 경량 웹 프레임워크 (Express 대체) |
-| **언어** | TypeScript | 5.0+ | 타입 안전성 |
-| **린터/포매터** | Biome | 2.2+ | ESLint + Prettier 통합 (Rust 기반) |
-| **컨테이너** | Docker | - | 멀티 플랫폼 지원 (ARM64/x86_64) |
-| **프로세스 관리** | PM2 | - | 무중단 배포 및 클러스터링 |
+| 구분              | 기술                     | 버전 | 설명                                  |
+| ----------------- | ------------------------ | ---- | ------------------------------------- |
+| **런타임**        | [Bun](https://bun.sh)    | 1.3+ | 빠른 JavaScript 런타임 (Node.js 대체) |
+| **프레임워크**    | [Hono](https://hono.dev) | 4.9+ | 경량 웹 프레임워크 (Express 대체)     |
+| **언어**          | TypeScript               | 5.0+ | 타입 안전성                           |
+| **린터/포매터**   | Biome                    | 2.2+ | ESLint + Prettier 통합 (Rust 기반)    |
+| **컨테이너**      | Docker                   | -    | 멀티 플랫폼 지원 (ARM64/x86_64)       |
+| **프로세스 관리** | PM2                      | -    | 무중단 배포 및 클러스터링             |
 
 ### 왜 Bun + Hono인가?
 
 **성능:**
+
 - Node.js + Express 대비 **2-3배 빠른 HTTP 처리**
 - **30-50% 적은 메모리 사용량**
 - TypeScript 네이티브 지원 (별도 컴파일 불필요)
 
 **개발 경험:**
+
 - `bun install`이 npm보다 **10-20배 빠름**
 - `.env` 파일 자동 로드 (dotenv 불필요)
 - Hot Module Replacement (HMR) 기본 지원
 
 **비용 절감:**
+
 - EC2 인스턴스 사이즈 다운그레이드 가능
 - AWS Graviton (ARM64)과 완벽 호환
 
@@ -101,15 +104,15 @@ bun run dev
 
 ### 사용 가능한 스크립트
 
-| 명령어 | 설명 |
-|--------|------|
-| `bun run dev` | 개발 서버 시작 (Hot Reload) |
-| `bun run build` | 프로덕션 빌드 (minify, tree-shaking) |
-| `bun run start` | 빌드된 파일 실행 |
-| `bun run lint` | 코드 린트 체크 |
-| `bun run lint:fix` | 린트 자동 수정 |
-| `bun run format` | 코드 포매팅 |
-| `bun run check` | 린트 + 포맷 한 번에 실행 |
+| 명령어             | 설명                                 |
+| ------------------ | ------------------------------------ |
+| `bun run dev`      | 개발 서버 시작 (Hot Reload)          |
+| `bun run build`    | 프로덕션 빌드 (minify, tree-shaking) |
+| `bun run start`    | 빌드된 파일 실행                     |
+| `bun run lint`     | 코드 린트 체크                       |
+| `bun run lint:fix` | 린트 자동 수정                       |
+| `bun run format`   | 코드 포매팅                          |
+| `bun run check`    | 린트 + 포맷 한 번에 실행             |
 
 ### 환경 변수
 
@@ -132,6 +135,7 @@ bun run check
 ```
 
 **Biome 특징:**
+
 - ESLint + Prettier를 하나로 통합
 - Rust 기반으로 **35배 빠름**
 - 자동 import 정리
@@ -180,12 +184,14 @@ cd /home/ubuntu/hono-app
 ```
 
 **스크립트 내용:**
+
 1. Git pull
 2. `bun install`
 3. `bun run build`
 4. `pm2 reload` (무중단 재시작)
 
 **PM2 명령어:**
+
 ```bash
 # 시작
 pm2 start ecosystem.config.cjs
@@ -214,6 +220,7 @@ cd /home/ubuntu/hono-app
 ```
 
 **스크립트 내용:**
+
 1. Git pull
 2. Docker 이미지 리빌드
 3. 컨테이너 재시작 (무중단)
@@ -233,9 +240,11 @@ bun run start
 ## 📡 API 엔드포인트
 
 ### `GET /`
+
 기본 헬스 체크
 
 **응답:**
+
 ```
 💗 HELLO WORLD
 ```
@@ -243,9 +252,11 @@ bun run start
 ---
 
 ### `GET /health`
+
 상세 헬스 체크 (모니터링용)
 
 **응답:**
+
 ```
 ✅ HELATH CHECK SUCCESS
 ```
@@ -255,12 +266,15 @@ bun run start
 ---
 
 ### `GET /api/users/:id`
+
 사용자 정보 조회 (예제)
 
 **파라미터:**
+
 - `id` (string): 사용자 ID
 
 **응답 예시:**
+
 ```json
 {
   "id": "123",
@@ -271,9 +285,11 @@ bun run start
 ---
 
 ### `POST /api/posts`
+
 게시물 생성 (예제)
 
 **요청 본문:**
+
 ```json
 {
   "title": "New Post",
@@ -282,6 +298,7 @@ bun run start
 ```
 
 **응답:**
+
 ```json
 {
   "message": "Post created",
@@ -299,6 +316,7 @@ bun run start
 ## 🔧 미들웨어
 
 ### 1. Trailing Slash 제거
+
 `/api/users/` → `/api/users` (301 리다이렉트)
 
 루트 경로(`/`)는 예외 처리됩니다.
@@ -308,14 +326,17 @@ bun run start
 ---
 
 ### 2. 요청 로깅
+
 모든 HTTP 요청을 콘솔에 로깅합니다.
 
 **로그 형식:**
+
 ```
 [2025-01-15T10:30:45.123Z] 192.168.1.1 - GET /api/users/123 200 - 15ms
 ```
 
 **기능:**
+
 - 클라이언트 IP 추출 (`X-Forwarded-For`, `X-Real-IP` 지원)
 - IPv6 → IPv4 변환
 - 요청 처리 시간 측정
@@ -327,23 +348,25 @@ bun run start
 ### 3. 에러 핸들링
 
 #### Uncaught Exception
+
 예상치 못한 동기 에러 처리
 
 ```javascript
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error)
-  process.exit(1)
-})
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  process.exit(1);
+});
 ```
 
 #### Unhandled Rejection
+
 Promise rejection 미처리 에러
 
 ```javascript
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason)
-  process.exit(1)
-})
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1);
+});
 ```
 
 **구현 위치:** `server.ts:66-75`
@@ -351,15 +374,18 @@ process.on('unhandledRejection', (reason, promise) => {
 ---
 
 ### 4. Graceful Shutdown
+
 `SIGINT`, `SIGTERM` 시그널 수신 시 안전하게 종료
 
 **동작:**
+
 1. 새 요청 수신 중단
 2. 진행 중인 요청 완료 대기
 3. 10초 타임아웃 (강제 종료)
 4. 서버 종료
 
 **PM2와의 호환성:**
+
 - `pm2 reload` 명령 시 무중단 재시작 가능
 - `ecosystem.config.cjs`의 `wait_ready`, `kill_timeout` 설정과 연동
 
@@ -370,11 +396,13 @@ process.on('unhandledRejection', (reason, promise) => {
 ## 🔒 보안 고려사항
 
 ### 현재 구현
+
 - ✅ Non-root 유저로 Docker 컨테이너 실행
 - ✅ 프로덕션 의존성만 포함 (devDependencies 제외)
 - ✅ 최소 권한 원칙 (Alpine Linux)
 
 ### 추가 권장사항
+
 - [ ] CORS 설정 추가 (프로덕션)
 - [ ] Rate Limiting 미들웨어
 - [ ] Helmet 헤더 보안
@@ -385,19 +413,23 @@ process.on('unhandledRejection', (reason, promise) => {
 ## 📊 성능 최적화
 
 ### 빌드 최적화
+
 ```bash
 bun build server.ts --outdir=dist --minify --target=bun
 ```
 
 **최적화 기법:**
+
 - Tree-shaking (사용하지 않는 코드 제거)
 - Minification (코드 압축)
 - `--target=bun` (Bun 런타임 최적화)
 
 ### 클러스터링
+
 PM2가 자동으로 CPU 코어 수만큼 인스턴스를 생성합니다.
 
 **설정:** `ecosystem.config.cjs`
+
 ```javascript
 instances: 2,        // 인스턴스 개수
 exec_mode: "cluster" // 클러스터 모드
@@ -425,15 +457,18 @@ curl -X POST http://localhost:3000/api/posts \
 ## 📚 참고 문서
 
 ### 공식 문서
+
 - [Bun 공식 문서](https://bun.sh/docs)
 - [Hono 공식 문서](https://hono.dev)
 - [Biome 공식 문서](https://biomejs.dev)
 
 ### 프로젝트 문서
+
 - [멀티 플랫폼 Docker 가이드](./README_MULTI_PLATFORM.md)
 - [PM2 설정 가이드](./ecosystem.config.cjs)
 
 ### 관련 리소스
+
 - [Bun vs Node.js 벤치마크](https://bun.sh/docs/benchmarks)
 - [Hono 성능 비교](https://hono.dev/concepts/benchmarks)
 - [Docker Buildx 멀티 플랫폼](https://docs.docker.com/build/building/multi-platform/)
@@ -459,25 +494,22 @@ This project is licensed under the MIT License.
 ## 🙋 FAQ
 
 ### Q: Bun은 프로덕션에서 안정적인가요?
+
 A: 2024년 9월 Bun 1.0이 출시되었으며, 현재 1.3 버전은 프로덕션 사용에 충분히 안정적입니다. Vercel, Railway 등의 플랫폼에서 공식 지원합니다.
 
 ### Q: Node.js 패키지와 호환되나요?
+
 A: 대부분의 npm 패키지가 호환됩니다. 다만 네이티브 C++ 애드온을 사용하는 일부 패키지는 제한될 수 있습니다.
 
 ### Q: PM2와 Docker 중 무엇을 선택해야 하나요?
+
 A:
+
 - **PM2**: 간단한 배포, 로그 관리가 쉬움, 낮은 오버헤드
 - **Docker**: 환경 격리, 확장성, Kubernetes 등과 통합 용이
 
 소규모 프로젝트는 PM2, 마이크로서비스 아키텍처는 Docker를 권장합니다.
 
 ### Q: AWS Graviton (ARM64)에서 사용할 수 있나요?
-A: 네! 이 프로젝트는 ARM64를 완벽 지원하며, Graviton 인스턴스에서 x86 대비 20% 비용 절감이 가능합니다.
 
----
-
-## 📞 연락처
-
-문제가 발생하거나 질문이 있으시면 이슈를 생성해 주세요.
-
-**Happy Coding! 🚀**
+A: 네! 이 프로젝트는 ARM64를 완벽 지원하며, Graviton 인스턴스에서 x86 대비 30%~40% 비용 절감이 가능합니다.
