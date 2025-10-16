@@ -49,6 +49,10 @@ app.get("/", (c) => {
   return c.text("💗 HELLO HONO!\n");
 });
 
+app.get("/hello", (c) => {
+  return c.json({ message: "💗 HELLO HONO FROM JSON!" });
+});
+
 app.get("/health", (c) => {
   return c.text("✅ HONO: HELATH CHECK SUCCESS\n", 200);
 });
