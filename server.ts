@@ -54,7 +54,7 @@ app.get("/hello", (c) => {
 });
 
 app.get("/health", (c) => {
-  return c.text("💗건강해야해! ✅ HONO: HELATH CHECK SUCCESS\n", 200);
+  return c.text("💗행복해야해! ✅ HONO: HELATH CHECK SUCCESS\n", 200);
 });
 
 app.get("/api/users/:id", (c) => {
