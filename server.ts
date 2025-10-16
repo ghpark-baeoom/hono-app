@@ -46,7 +46,7 @@ app.use("*", async (c: Context, next: Next) => {
 });
 
 app.get("/", (c) => {
-  return c.text("💗❤️ HELLO HONO!\n");
+  return c.text("💗ROLLING-ROCK❤️ HELLO HONO!\n");
 });
 
 app.get("/hello", (c) => {
