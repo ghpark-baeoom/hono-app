@@ -16,7 +16,7 @@ module.exports = {
         // PORT: 3000 // 필요 시 포트 설정
       },
       kill_timeout: 5000, // 프로세스 종료 대기 시간 (밀리초)
-      wait_ready: true, // 앱이 준비될 때까지 대기 (listen 완료 확인)
+      wait_ready: false, // Bun + PM2 호환성 문제로 비활성화
       listen_timeout: 10000, // listen 완료 대기 최대 시간 (밀리초)
       // PID 추적 문제 해결을 위한 추가 설정
       merge_logs: true, // 여러 인스턴스의 로그 병합

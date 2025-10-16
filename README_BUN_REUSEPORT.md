@@ -186,6 +186,7 @@ module.exports = {
       exec_mode: 'fork',     // ✅ fork 모드 (cluster 아님!)
       autorestart: true,
       max_memory_restart: '1G',
+      wait_ready: false,     // ✅ Bun 호환성 문제로 비활성화
       env: {
         NODE_ENV: 'production',
       },
@@ -197,6 +198,7 @@ module.exports = {
 **중요:**
 - `exec_mode: 'fork'` 필수 (cluster는 작동 안 함)
 - `instances: 2` 이상 설정 가능
+- `wait_ready: false` 필수 (true이면 반복 재시작 발생)
 - Linux에서만 제대로 작동
 
 ---
@@ -356,7 +358,52 @@ PM2 cluster 모드의 일부 기능을 사용할 수 없습니다:
 
 ## 트러블슈팅
 
-### 문제 1: PM2가 PID를 추적하지 못함 (pid: N/A)
+### 문제 1: 서버가 반복적으로 재시작됨
+
+#### 증상
+```bash
+pm2 logs
+# Server is running on http://localhost:3001 ✅ [PID: 2575]
+# Server is shutting down gracefully...  # ← 바로 종료!
+# Server closed
+# Server is running on http://localhost:3001 ✅ [PID: 2580]  # 다시 시작
+```
+
+#### 원인
+`wait_ready: true` 설정 때문에 PM2가 `process.send('ready')` 신호를 기다리는데, Bun + PM2 조합에서 이 신호가 제대로 전달되지 않아 타임아웃으로 프로세스를 강제 종료합니다.
+
+#### 해결 방법
+```javascript
+// ecosystem.config.cjs
+module.exports = {
+  apps: [{
+    name: 'hono-app',
+    script: 'dist/server.js',
+    interpreter: 'bun',
+    wait_ready: false,  // ✅ false로 설정 (필수!)
+  }]
+}
+```
+
+그리고 `server.ts`에서 ready 신호 코드 제거:
+```typescript
+// ❌ 제거할 코드
+if (process.send) {
+  process.send('ready')
+}
+```
+
+재배포 후 확인:
+```bash
+bun run build
+pm2 reload ecosystem.config.cjs
+pm2 logs --lines 20
+# 더 이상 반복 재시작 없어야 함
+```
+
+---
+
+### 문제 2: PM2가 PID를 추적하지 못함 (pid: N/A)
 
 #### 증상
 ```bash
@@ -426,7 +473,7 @@ setInterval(() => {
 
 ---
 
-### 문제 2: macOS에서 두 번째 프로세스 에러
+### 문제 3: macOS에서 두 번째 프로세스 에러
 
 #### 증상
 ```bash
@@ -459,7 +506,7 @@ module.exports = {
 
 ---
 
-### 문제 3: PM2가 Cluster 모드로 시도
+### 문제 4: PM2가 Cluster 모드로 시도
 
 #### 증상
 ```
@@ -481,7 +528,7 @@ instances: 2  // 여러 인스턴스는 이것으로 설정
 
 ---
 
-### 문제 4: 로드 밸런싱이 작동하지 않음
+### 문제 5: 로드 밸런싱이 작동하지 않음
 
 #### 증상
 모든 요청이 같은 프로세스로 전달됨
@@ -507,7 +554,7 @@ pm2 restart ecosystem.config.cjs
 
 ---
 
-### 문제 5: Linux에서도 작동하지 않음
+### 문제 6: Linux에서도 작동하지 않음
 
 #### 체크리스트
 
