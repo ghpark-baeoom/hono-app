@@ -32,6 +32,9 @@ Dockerfile*
 docker-compose*.yml
 .dockerignore
 
+# Nginx configuration (excluded from Docker image build)
+nginx
+
 # Documentation
 README.md
 *.md
