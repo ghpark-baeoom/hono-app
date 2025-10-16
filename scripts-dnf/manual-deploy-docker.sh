@@ -2,14 +2,14 @@
 
 set -e
 
-# 스크립트가 있는 디렉토리로 이동
-cd "$(dirname "$0")"
+# 프로젝트 루트 디렉토리로 이동 (scripts-dnf의 상위 디렉토리)
+cd "$(dirname "$0")/.."
 
 echo "🚀 Starting Hono app Docker Compose deployment..."
 
 # 1. Pull latest code
 echo "📥 Pulling latest code from git..."
-./git-pull.sh
+git pull origin main
 
 # 2. Rebuild and restart containers with Bun (zero-downtime)
 echo "🔨 Building new Hono app image with Bun and restarting containers..."

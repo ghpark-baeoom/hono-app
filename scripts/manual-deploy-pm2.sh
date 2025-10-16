@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# 스크립트가 있는 디렉토리로 이동
-cd "$(dirname "$0")"
+# 프로젝트 루트 디렉토리로 이동 (scripts의 상위 디렉토리)
+cd "$(dirname "$0")/.."
 
 echo "🚀 Starting Hono app deployment with Bun..."
 
