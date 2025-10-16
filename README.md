@@ -56,15 +56,23 @@ hono-app/
 ├── bun.lockb                    # Bun 잠금 파일
 ├── tsconfig.json                # TypeScript 설정
 ├── biome.json                   # Biome 린터/포매터 설정
+├── .biomeignore                 # Biome 제외 파일
 │
 ├── Dockerfile                   # 멀티 플랫폼 Docker 이미지 (ARM64/x86_64)
 ├── docker-compose.yml           # Docker Compose 설정
 ├── .dockerignore                # Docker 빌드 제외 파일
 │
-├── ecosystem.config.cjs         # PM2 프로세스 관리 설정
+├── ecosystem.config.cjs         # PM2 프로세스 관리 설정 (Bun + reusePort)
 │
-├── scripts/                     # 배포 스크립트
+├── scripts/                     # Ubuntu/Debian 배포 스크립트 (apt)
 │   ├── install-docker.sh        # Docker 설치 스크립트
+│   ├── manual-deploy-pm2.sh     # PM2 배포
+│   ├── manual-deploy-docker.sh  # Docker Compose 배포
+│   └── git-pull.sh              # Git pull 헬퍼
+│
+├── scripts-dnf/                 # Amazon Linux 2023 배포 스크립트 (dnf)
+│   ├── README.md                # AL2023 가이드
+│   ├── install-docker.sh        # Docker 설치 (dnf)
 │   ├── manual-deploy-pm2.sh     # PM2 배포
 │   ├── manual-deploy-docker.sh  # Docker Compose 배포
 │   └── git-pull.sh              # Git pull 헬퍼
@@ -72,7 +80,9 @@ hono-app/
 ├── dist/                        # 빌드 출력 (생성됨)
 │   └── server.js
 │
-└── README_MULTI_PLATFORM.md     # Docker 멀티 플랫폼 가이드
+├── README.md                    # 메인 문서 (본 파일)
+├── README_MULTI_PLATFORM.md     # Docker 멀티 플랫폼 가이드
+└── README_BUN_REUSEPORT.md      # Bun reusePort 클러스터링 가이드
 ```
 
 ---
@@ -96,7 +106,7 @@ bun install
 bun run dev
 ```
 
-서버가 `http://localhost:3000`에서 실행됩니다.
+서버가 `http://localhost:3001`에서 실행됩니다.
 
 ---
 
@@ -119,7 +129,7 @@ bun run dev
 `.env` 파일을 생성하여 환경 변수를 설정하세요:
 
 ```bash
-PORT=3000
+PORT=3001
 NODE_ENV=development
 ```
 
@@ -424,16 +434,25 @@ bun build server.ts --outdir=dist --minify --target=bun
 - Minification (코드 압축)
 - `--target=bun` (Bun 런타임 최적화)
 
-### 클러스터링
+### 클러스터링 (Bun reusePort)
 
-PM2가 자동으로 CPU 코어 수만큼 인스턴스를 생성합니다.
+Bun은 PM2 cluster 모드를 지원하지 않지만, `reusePort: true`로 멀티 프로세스 로드 밸런싱이 가능합니다 (Linux만).
 
 **설정:** `ecosystem.config.cjs`
 
 ```javascript
-instances: 2,        // 인스턴스 개수
-exec_mode: "cluster" // 클러스터 모드
+instances: 2,        // 인스턴스 개수 (Linux에서 reusePort와 함께 사용)
+exec_mode: "fork",   // Bun은 fork 모드만 지원
 ```
+
+**server.ts:**
+```typescript
+Bun.serve({
+  reusePort: true,  // Linux 커널이 자동 로드 밸런싱
+})
+```
+
+자세한 내용은 [README_BUN_REUSEPORT.md](./README_BUN_REUSEPORT.md)를 참고하세요.
 
 ---
 
@@ -441,13 +460,13 @@ exec_mode: "cluster" // 클러스터 모드
 
 ```bash
 # 헬스 체크
-curl http://localhost:3000/health
+curl http://localhost:3001/health
 
 # API 테스트
-curl http://localhost:3000/api/users/123
+curl http://localhost:3001/api/users/123
 
 # POST 요청 테스트
-curl -X POST http://localhost:3000/api/posts \
+curl -X POST http://localhost:3001/api/posts \
   -H "Content-Type: application/json" \
   -d '{"title":"Test","content":"Hello"}'
 ```
@@ -465,7 +484,9 @@ curl -X POST http://localhost:3000/api/posts \
 ### 프로젝트 문서
 
 - [멀티 플랫폼 Docker 가이드](./README_MULTI_PLATFORM.md)
-- [PM2 설정 가이드](./ecosystem.config.cjs)
+- [Bun reusePort 클러스터링 가이드](./README_BUN_REUSEPORT.md)
+- [Amazon Linux 2023 배포 가이드](./scripts-dnf/README.md)
+- [PM2 설정](./ecosystem.config.cjs)
 
 ### 관련 리소스
 
@@ -512,4 +533,16 @@ A:
 
 ### Q: AWS Graviton (ARM64)에서 사용할 수 있나요?
 
-A: 네! 이 프로젝트는 ARM64를 완벽 지원하며, Graviton 인스턴스에서 x86 대비 30%~40% 비용 절감이 가능합니다.
+A: 네! 이 프로젝트는 ARM64를 완벽 지원하며, Graviton 인스턴스에서 x86 대비 20% 비용 절감이 가능합니다.
+
+### Q: Ubuntu와 Amazon Linux 2023 중 어떤 것을 사용해야 하나요?
+
+A:
+- **Ubuntu (scripts/)**: 범용적으로 사용, 커뮤니티 지원 풍부
+- **Amazon Linux 2023 (scripts-dnf/)**: AWS 최적화, AL2023 전용
+
+둘 다 완벽히 지원되므로 선호도에 따라 선택하세요.
+
+### Q: Bun의 reusePort는 어떤 OS에서 작동하나요?
+
+A: **Linux만 작동**합니다. macOS와 Windows에서는 무시되며, `instances: 1`로 설정해야 합니다. 자세한 내용은 [README_BUN_REUSEPORT.md](./README_BUN_REUSEPORT.md)를 참고하세요.

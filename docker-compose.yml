@@ -8,14 +8,14 @@ services:
     container_name: hono-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3001
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "bun", "fetch", "http://localhost:3000/health"]
+      test: ["CMD", "bun", "fetch", "http://localhost:3001/health"]
       interval: 30s
       timeout: 3s
       retries: 3

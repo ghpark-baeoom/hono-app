@@ -61,11 +61,11 @@ RUN addgroup -g 1001 -S bunuser && \
 USER bunuser
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD bun fetch http://localhost:3000/health || exit 1
+  CMD bun fetch http://localhost:3001/health || exit 1
 
 # Start application with built and minified JS
 CMD ["bun", "run", "dist/server.js"]
