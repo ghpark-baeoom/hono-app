@@ -67,6 +67,18 @@ app.post('/api/posts', async (c) => {
   return c.json({ message: 'Post created!\n', data: body }, 201)
 })
 
+// 404 Not Found Handler
+app.notFound((c) => {
+  return c.json(
+    {
+      error: 'Not Found',
+      message: `The requested path '${c.req.path}' does not exist`,
+      status: 404,
+    },
+    404,
+  )
+})
+
 // Error Handlers (비정상 종료)
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error)
