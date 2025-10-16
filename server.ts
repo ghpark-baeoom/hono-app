@@ -93,8 +93,8 @@ const server = Bun.serve({
 console.log(`.env $PORT: ${PORT}`)
 console.log(`Server is running on http://localhost:${PORT} ✅ [PID: ${process.pid}]`)
 
-// Note: PM2 ready signal (process.send('ready')) is disabled due to
-// compatibility issues with Bun interpreter causing premature shutdowns
+// Note: PM2 ready signal은 Bun 런타임에서 IPC 호환성 문제로 비활성화
+// Node.js 런타임을 사용할 경우에만 process.send('ready') 활성화 가능
 
 // Graceful Shutdowns (정상 종료)
 const gracefulShutdown = () => {
