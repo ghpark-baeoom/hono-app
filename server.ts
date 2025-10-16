@@ -55,7 +55,7 @@ app.get("/health", (c) => {
 
 app.get("/api/users/:id", (c) => {
   const id = c.req.param("id");
-  return c.json({ id, name: `User ${id}\n` });
+  return c.json({ id, name: `User ${id}` });
 });
 
 app.post("/api/posts", async (c) => {
