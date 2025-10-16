@@ -46,21 +46,21 @@ app.use("*", async (c: Context, next: Next) => {
 });
 
 app.get("/", (c) => {
-  return c.text("💗 HELLO HONO!");
+  return c.text("💗 HELLO HONO!\n");
 });
 
 app.get("/health", (c) => {
-  return c.text("✅ HONO: HELATH CHECK SUCCESS", 200);
+  return c.text("✅ HONO: HELATH CHECK SUCCESS\n", 200);
 });
 
 app.get("/api/users/:id", (c) => {
   const id = c.req.param("id");
-  return c.json({ id, name: `User ${id}` });
+  return c.json({ id, name: `User ${id}\n` });
 });
 
 app.post("/api/posts", async (c) => {
   const body = await c.req.json();
-  return c.json({ message: "Post created", data: body }, 201);
+  return c.json({ message: "Post created!\n", data: body }, 201);
 });
 
 // Error Handlers (비정상 종료)
