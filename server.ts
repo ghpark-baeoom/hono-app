@@ -54,7 +54,7 @@ app.get("/hello", (c) => {
 });
 
 app.get("/health", (c) => {
-  return c.text("⭐️🎉✅ HONO: HELATH CHECK SUCCESS\n", 200);
+  return c.text("💗HEALTHY-ROCK ✅ HONO: HELATH CHECK SUCCESS\n", 200);
 });
 
 app.get("/api/users/:id", (c) => {
