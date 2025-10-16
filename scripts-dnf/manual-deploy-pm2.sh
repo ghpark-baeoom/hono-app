@@ -21,7 +21,37 @@ bun run build
 echo "♻️  Reloading PM2 processes..."
 pm2 reload ecosystem.config.cjs
 
-# 5. Show status
+# 5. Wait for app to be ready
+echo "⏳ Waiting for app to be ready..."
+sleep 3
+
+# 6. Health check
+echo "🏥 Running health check..."
+MAX_RETRIES=10
+RETRY_COUNT=0
+HEALTH_URL="http://localhost:3001/health"
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+  if curl -f -s "$HEALTH_URL" > /dev/null 2>&1; then
+    echo "✅ Health check passed!"
+    break
+  fi
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  echo "   Retry $RETRY_COUNT/$MAX_RETRIES..."
+  sleep 1
+done
+
+if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+  echo "❌ Health check failed after $MAX_RETRIES attempts!"
+  echo "📝 Recent logs:"
+  pm2 logs --lines 20 --nostream
+  exit 1
+fi
+
+# 7. Show status
+echo ""
 echo "✅ Deployment complete!"
 pm2 status
-pm2 logs --lines 10
+echo ""
+echo "📝 Recent logs:"
+pm2 logs --lines 10 --nostream
