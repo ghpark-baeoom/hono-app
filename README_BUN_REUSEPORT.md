@@ -93,15 +93,15 @@ Bun.serve({ port: 3000, fetch: handler })  // ❌ 에러
 ```typescript
 // 첫 번째 프로세스
 Bun.serve({
-  port: 3000,
+  port: 3001,  // 현재 프로젝트는 3001 포트 사용
   reusePort: true,  // ✅ SO_REUSEPORT 활성화
   fetch: handler
 })
 
 // 두 번째 프로세스
 Bun.serve({
-  port: 3000,
-  reusePort: true,  // ✅ 같은 포트 바인딩 가능!
+  port: 3001,  // 같은 포트!
+  reusePort: true,  // ✅ 여러 프로세스가 동일 포트 바인딩 가능!
   fetch: handler
 })
 ```
@@ -117,7 +117,7 @@ Bun.serve({
 │   클라이언트   │
 │  (브라우저)   │
 └──────┬──────┘
-       │ HTTP Request (port 3000)
+       │ HTTP Request (port 3001)
        ↓
 ┌──────────────────────────┐
 │   Linux Kernel           │
@@ -128,7 +128,7 @@ Bun.serve({
     ┌────↓───┐ ┌──↓─────┐
     │ Bun    │ │ Bun    │
     │Process1│ │Process2│
-    │:3000   │ │:3000   │ ← 같은 포트!
+    │:3001   │ │:3001   │ ← 같은 포트!
     └────────┘ └────────┘
 ```
 
@@ -152,7 +152,7 @@ app.get('/', (c) => {
   return c.text('Hello from Process ' + process.pid)  // 프로세스 ID 확인
 })
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001  // 현재 프로젝트는 3001 포트
 
 const server = Bun.serve({
   port: PORT,
@@ -230,7 +230,7 @@ pm2 status
 └────┴──────────────┴─────────┴─────────┴──────────┘
 ```
 
-두 프로세스 모두 **포트 3000**을 사용합니다!
+두 프로세스 모두 **포트 3001**을 사용합니다!
 
 ---
 
@@ -238,13 +238,13 @@ pm2 status
 
 ```bash
 # 여러 번 요청 (프로세스 ID가 번갈아 나옴)
-curl http://localhost:3000/
+curl http://localhost:3001/
 # Hello from Process 12345
 
-curl http://localhost:3000/
+curl http://localhost:3001/
 # Hello from Process 12346
 
-curl http://localhost:3000/
+curl http://localhost:3001/
 # Hello from Process 12345
 ```
 
@@ -300,7 +300,7 @@ pm2 reload ecosystem.config.cjs
 pm2 start ecosystem.config.cjs  // instances: 2
 
 // 결과:
-// hono-app-0: ✅ 정상 시작 (포트 3000)
+// hono-app-0: ✅ 정상 시작 (포트 3001)
 // hono-app-1: ❌ 에러 (Address already in use)
 ```
 
@@ -356,15 +356,88 @@ PM2 cluster 모드의 일부 기능을 사용할 수 없습니다:
 
 ## 트러블슈팅
 
-### 문제 1: macOS에서 두 번째 프로세스 에러
+### 문제 1: PM2가 PID를 추적하지 못함 (pid: N/A)
 
 #### 증상
+```bash
+pm2 status
+# pid: N/A 표시, cpu: 0%, mem: 0b
+
+pm2 logs
+# Error caught while calling pidusage
+# TypeError: One of the pids provided is invalid
 ```
-Error: listen EADDRINUSE: address already in use :::3000
+
+#### 원인
+PM2가 Bun 인터프리터로 실행된 프로세스의 PID를 제대로 추적하지 못하는 알려진 이슈입니다. 앱은 실제로 정상 작동하지만, PM2의 모니터링 기능(CPU, 메모리 사용량 표시)이 작동하지 않습니다.
+
+#### 해결 방법 1: ecosystem.config.cjs 설정 개선
+```javascript
+module.exports = {
+  apps: [{
+    name: 'hono-app',
+    script: 'dist/server.js',
+    interpreter: 'bun',
+    interpreter_args: '',  // 인터프리터 인자 명시
+    instances: 2,
+    exec_mode: 'fork',
+    // PID 추적 문제 완화를 위한 추가 설정
+    merge_logs: true,
+    combine_logs: true,
+    time: true,
+    log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+  }]
+}
+```
+
+#### 해결 방법 2: 실제 PID 확인
+PM2 status가 정확하지 않더라도, 실제 프로세스는 정상 작동합니다:
+
+```bash
+# 실제 PID 확인
+ps aux | grep "bun.*server.js"
+
+# 또는 로그에서 PID 확인
+pm2 logs hono-app
+# Server is running on http://localhost:3001 ✅ [PID: 12345]
+
+# 실제 프로세스 상태 확인
+lsof -i :3001
+# bun    12345 ec2-user   6u  IPv4  ...  TCP *:3001 (LISTEN)
+# bun    12346 ec2-user   6u  IPv4  ...  TCP *:3001 (LISTEN)
+```
+
+#### 해결 방법 3: 앱 로그로 모니터링
+server.ts에서 직접 메트릭 로깅:
+
+```typescript
+// 5분마다 메모리 사용량 로그
+setInterval(() => {
+  const usage = process.memoryUsage()
+  console.log(`[PID: ${process.pid}] Memory: ${(usage.heapUsed / 1024 / 1024).toFixed(2)} MB`)
+}, 5 * 60 * 1000)
+```
+
+#### 영향 범위
+- **작동 불가:** PM2 대시보드의 CPU/메모리 표시
+- **정상 작동:** 앱 실행, 로드 밸런싱, 자동 재시작, 무중단 배포, 로그 수집
+
+**결론:** PM2 모니터링 표시가 부정확하지만, 실제 앱과 PM2 관리 기능은 정상 작동합니다.
+
+---
+
+### 문제 2: macOS에서 두 번째 프로세스 에러
+
+#### 증상
+```bash
+# 설정된 포트(예: 3001)에서 에러 발생
+Error: listen EADDRINUSE: address already in use :::3001
 ```
 
 #### 원인
 macOS는 `SO_REUSEPORT`를 완전히 지원하지 않음
+
+**참고:** 실제 에러 메시지에는 `ecosystem.config.cjs`에 설정된 포트 번호(예: 3001)가 표시됩니다.
 
 #### 해결 방법
 개발 환경에서는 `instances: 1` 사용:
@@ -386,7 +459,7 @@ module.exports = {
 
 ---
 
-### 문제 2: PM2가 Cluster 모드로 시도
+### 문제 3: PM2가 Cluster 모드로 시도
 
 #### 증상
 ```
@@ -408,7 +481,7 @@ instances: 2  // 여러 인스턴스는 이것으로 설정
 
 ---
 
-### 문제 3: 로드 밸런싱이 작동하지 않음
+### 문제 4: 로드 밸런싱이 작동하지 않음
 
 #### 증상
 모든 요청이 같은 프로세스로 전달됨
@@ -434,7 +507,7 @@ pm2 restart ecosystem.config.cjs
 
 ---
 
-### 문제 4: Linux에서도 작동하지 않음
+### 문제 5: Linux에서도 작동하지 않음
 
 #### 체크리스트
 
