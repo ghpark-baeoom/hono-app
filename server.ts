@@ -87,7 +87,13 @@ const server = Bun.serve({
 })
 
 console.log(`.env $PORT: ${PORT}`)
-console.log(`Server is running on http://localhost:${PORT} ✅`)
+console.log(`Server is running on http://localhost:${PORT} ✅ [PID: ${process.pid}]`)
+
+// PM2 ready signal (fork mode with reusePort)
+// PM2가 앱이 준비되었음을 인식하도록 신호 전송
+if (process.send) {
+  process.send('ready')
+}
 
 // Graceful Shutdowns (정상 종료)
 const gracefulShutdown = () => {
