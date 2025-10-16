@@ -48,12 +48,12 @@ COPY --chown=bunuser:bunuser --from=build /app/package.json ./package.json
 USER bunuser
 
 # 앱 포트 (기본 3001, .env 또는 compose environment로 재정의 가능)
-EXPOSE 3001
+EXPOSE 4000
 
 # Healthcheck: 200 OK 기대 + 에러 핸들러
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD bun -e "await fetch('http://localhost:'+(process.env.PORT||'3001')+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD bun -e "await fetch('http://localhost:'+(process.env.PORT||'4000')+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 # Start (PORT는 환경변수로 주입 가능: 기본 3001)
-ENV PORT=3001
+ENV PORT=4000
 CMD ["bun", "run", "dist/server.js"]
