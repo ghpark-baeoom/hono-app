@@ -46,7 +46,7 @@ app.use("*", async (c: Context, next: Next) => {
 });
 
 app.get("/", (c) => {
-  return c.text("💗ROLLING-ROCK❤️ HELLO HONO!\n");
+  return c.text("💗 HELLO HONO!\n");
 });
 
 app.get("/hello", (c) => {
@@ -54,7 +54,7 @@ app.get("/hello", (c) => {
 });
 
 app.get("/health", (c) => {
-  return c.text("💗행복해야해! ✅ HONO: HELATH CHECK SUCCESS\n", 200);
+  return c.text("💗 HONO: HELATH CHECK SUCCESS\n", 200);
 });
 
 app.get("/api/users/:id", (c) => {
