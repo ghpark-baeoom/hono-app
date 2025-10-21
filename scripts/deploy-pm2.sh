@@ -19,7 +19,7 @@ bun run build
 
 # 4. Reload PM2 (zero-downtime)
 echo "♻️  Reloading PM2 processes..."
-pm2 reload ecosystem.config.cjs
+pm2 reload ecosystem.config.cjs --update-env
 
 # 5. Wait for app to be ready
 echo "⏳ Waiting for app to be ready..."

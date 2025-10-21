@@ -3,15 +3,37 @@ import { Hono } from "hono";
 
 const app = new Hono();
 
-// Remove trailing slashes from URLs (except root "/")
+/**
+ * ✅ URL 끝의 슬래시("/")를 제거하는 Hono 미들웨어 (루트 "/"는 예외)
+ *
+ * @description
+ * - 표준 URL API를 사용하여 URL 전체를 안전하게 파싱합니다.
+ * - 쿼리스트링(`?a=1&b=2`)은 그대로 유지합니다.
+ * - 인코딩된 문자(`%20`, `%2F` 등)나 다중 슬래시(`///`)도 정상적으로 처리합니다.
+ * - Nginx 등 리버스 프록시 뒤에서도 원본 요청 경로를 기준으로 작동합니다.
+ * - URL 파싱 오류 발생 시, 다음 미들웨어로 안전하게 제어를 넘깁니다.
+ *
+ * @example
+ * // before:  https://example.com/hello/?a=1
+ * // after:   https://example.com/hello?a=1
+ */
 app.use("*", async (c: Context, next: Next) => {
-  const path = new URL(c.req.url).pathname;
-  if (path !== "/" && path.endsWith("/")) {
-    const newPath = path.slice(0, -1);
-    const newUrl = new URL(c.req.url);
-    newUrl.pathname = newPath;
-    return c.redirect(newUrl.toString(), 301);
+  try {
+    const url = new URL(c.req.url);
+    const pathname = url.pathname;
+
+    // 루트 "/"는 리다이렉트하지 않음
+    if (pathname !== "/" && pathname.endsWith("/")) {
+      // 경로 끝부분의 중복 슬래시들을 모두 제거
+      url.pathname = pathname.replace(/\/+$/, "");
+
+      // 쿼리스트링을 유지한 채로 301 리다이렉트 수행
+      return c.redirect(url.pathname + url.search, 301);
+    }
+  } catch (err) {
+    console.error("URL 파싱 중 오류 발생:", err);
   }
+
   await next();
 });
 
