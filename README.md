@@ -106,7 +106,7 @@ bun install
 bun run dev
 ```
 
-서버가 `http://localhost:3001`에서 실행됩니다.
+서버가 `http://localhost:4000`에서 실행됩니다.
 
 ---
 
@@ -129,7 +129,7 @@ bun run dev
 `.env` 파일을 생성하여 환경 변수를 설정하세요:
 
 ```bash
-PORT=3001
+PORT=4000
 NODE_ENV=development
 ```
 
@@ -446,10 +446,11 @@ exec_mode: "fork",   // Bun은 fork 모드만 지원
 ```
 
 **server.ts:**
+
 ```typescript
 Bun.serve({
-  reusePort: true,  // Linux 커널이 자동 로드 밸런싱
-})
+  reusePort: true, // Linux 커널이 자동 로드 밸런싱
+});
 ```
 
 자세한 내용은 [README_BUN_REUSEPORT.md](./README_BUN_REUSEPORT.md)를 참고하세요.
@@ -460,13 +461,13 @@ Bun.serve({
 
 ```bash
 # 헬스 체크
-curl http://localhost:3001/health
+curl http://localhost:4000/health
 
 # API 테스트
-curl http://localhost:3001/api/users/123
+curl http://localhost:4000/api/users/123
 
 # POST 요청 테스트
-curl -X POST http://localhost:3001/api/posts \
+curl -X POST http://localhost:4000/api/posts \
   -H "Content-Type: application/json" \
   -d '{"title":"Test","content":"Hello"}'
 ```
@@ -538,6 +539,7 @@ A: 네! 이 프로젝트는 ARM64를 완벽 지원하며, Graviton 인스턴스�
 ### Q: Ubuntu와 Amazon Linux 2023 중 어떤 것을 사용해야 하나요?
 
 A:
+
 - **Ubuntu (scripts/)**: 범용적으로 사용, 커뮤니티 지원 풍부
 - **Amazon Linux 2023 (scripts-dnf/)**: AWS 최적화, AL2023 전용
 

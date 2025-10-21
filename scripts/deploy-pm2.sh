@@ -29,7 +29,7 @@ sleep 3
 echo "🏥 Running health check..."
 MAX_RETRIES=10
 RETRY_COUNT=0
-HEALTH_URL="http://localhost:3001/health"
+HEALTH_URL="http://localhost:4000/health"
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
   if curl -f -s "$HEALTH_URL" > /dev/null 2>&1; then
