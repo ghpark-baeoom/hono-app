@@ -1,5 +1,6 @@
 import type { Context, Next } from "hono";
 import { Hono } from "hono";
+import { getClientIp } from "./lib/ip";
 
 const app = new Hono();
 
@@ -47,18 +48,19 @@ app.use("*", async (c: Context, next: Next) => {
   const timestamp = new Date().toISOString();
 
   // Get original client IP from X-Forwarded-For or fallback
+  // TRUST_PROXY 환경 변수로 신뢰할 프록시 개수 설정 (기본값: 1)
+  const trustProxy = parseInt(process.env.TRUST_PROXY || "1", 10);
   const forwardedFor = c.req.header("x-forwarded-for");
-  let clientIp = forwardedFor
-    ? forwardedFor.split(",")[0]?.trim() || "127.0.0.1"
-    : c.req.header("x-real-ip") || "127.0.0.1";
+  let clientIp = getClientIp(forwardedFor, trustProxy);
 
-  // Convert IPv6 to IPv4 if applicable
-  if (clientIp) {
-    // Remove IPv6 prefix (::ffff:) for IPv4-mapped addresses
-    clientIp = clientIp.replace(/^::ffff:/, "");
-    // Convert ::1 (IPv6 localhost) to 127.0.0.1 (IPv4 localhost)
-    if (clientIp === "::1") {
-      clientIp = "127.0.0.1";
+  // fallback: X-Real-IP 헤더 사용
+  if (clientIp === "127.0.0.1" && !forwardedFor) {
+    const realIp = c.req.header("x-real-ip");
+    if (realIp) {
+      clientIp = realIp.replace(/^::ffff:/, "");
+      if (clientIp === "::1") {
+        clientIp = "127.0.0.1";
+      }
     }
   }
 
