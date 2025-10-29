@@ -22,32 +22,29 @@
  * const TRUST_PROXY = parseInt(process.env.TRUST_PROXY || "1", 10);
  * const clientIp = getClientIp(forwardedFor, TRUST_PROXY);
  */
-export function getClientIp(
-  forwardedFor: string | undefined,
-  trustProxy: number = 1
-): string {
+export function getClientIp(forwardedFor: string | undefined, trustProxy: number = 1): string {
   if (!forwardedFor) {
-    return "127.0.0.1";
+    return '127.0.0.1'
   }
 
   const ips = forwardedFor
-    .split(",")
+    .split(',')
     .map((ip) => ip.trim())
-    .filter((ip) => ip.length > 0);
+    .filter((ip) => ip.length > 0)
 
   if (ips.length === 0) {
-    return "127.0.0.1";
+    return '127.0.0.1'
   }
 
   // trustProxy개 만큼 오른쪽에서 제거
-  const clientIpIndex = Math.max(0, ips.length - trustProxy - 1);
-  let clientIp = ips[clientIpIndex] || "127.0.0.1";
+  const clientIpIndex = Math.max(0, ips.length - trustProxy - 1)
+  let clientIp = ips[clientIpIndex] || '127.0.0.1'
 
   // IPv6 to IPv4 변환
-  clientIp = clientIp.replace(/^::ffff:/, "");
-  if (clientIp === "::1") {
-    clientIp = "127.0.0.1";
+  clientIp = clientIp.replace(/^::ffff:/, '')
+  if (clientIp === '::1') {
+    clientIp = '127.0.0.1'
   }
 
-  return clientIp;
+  return clientIp
 }
