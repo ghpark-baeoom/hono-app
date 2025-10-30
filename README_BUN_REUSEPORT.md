@@ -178,7 +178,7 @@ bun run build
 
 ---
 
-### 3. PM2 설정 (ecosystem.config.js)
+### 3. PM2 설정 (ecosystem.config.cjs)
 
 ```javascript
 module.exports = {
@@ -222,7 +222,7 @@ bun install
 bun run build
 
 # 3. PM2로 시작
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 
 # 4. 상태 확인
 pm2 status
@@ -265,7 +265,7 @@ Linux 커널이 자동으로 요청을 분산합니다!
 
 ```bash
 # PM2 reload (한 번에 한 프로세스씩 재시작)
-pm2 reload ecosystem.config.js
+pm2 reload ecosystem.config.cjs
 ```
 
 **작동 방식:**
@@ -310,7 +310,7 @@ pm2 reload ecosystem.config.js
 
 ```typescript
 // macOS에서 실행 시
-pm2 start ecosystem.config.js  // instances: 2
+pm2 start ecosystem.config.cjs  // instances: 2
 
 // 결과:
 // hono-app-0: ✅ 정상 시작 (포트 4000)
@@ -394,7 +394,7 @@ pm2 logs
 #### 해결 방법
 
 ```javascript
-// ecosystem.config.js
+// ecosystem.config.cjs
 module.exports = {
   apps: [
     {
@@ -420,7 +420,7 @@ if (process.send) {
 
 ```bash
 bun run build
-pm2 reload ecosystem.config.js
+pm2 reload ecosystem.config.cjs
 pm2 logs --lines 20
 # 더 이상 반복 재시작 없어야 함
 ```
@@ -444,7 +444,7 @@ pm2 logs
 
 PM2가 Bun 인터프리터로 실행된 프로세스의 PID를 제대로 추적하지 못하는 알려진 이슈입니다. 앱은 실제로 정상 작동하지만, PM2의 모니터링 기능(CPU, 메모리 사용량 표시)이 작동하지 않습니다.
 
-#### 해결 방법 1: ecosystem.config.js 설정 개선
+#### 해결 방법 1: ecosystem.config.cjs 설정 개선
 
 ```javascript
 module.exports = {
@@ -522,7 +522,7 @@ Error: listen EADDRINUSE: address already in use :::4000
 
 macOS는 `SO_REUSEPORT`를 완전히 지원하지 않음
 
-**참고:** 실제 에러 메시지에는 `ecosystem.config.js`에 설정된 포트 번호(예: 4000)가 표시됩니다.
+**참고:** 실제 에러 메시지에는 `ecosystem.config.cjs`에 설정된 포트 번호(예: 4000)가 표시됩니다.
 
 #### 해결 방법
 
@@ -597,7 +597,7 @@ const server = Bun.serve({
 
 ```bash
 bun run build
-pm2 restart ecosystem.config.js
+pm2 restart ecosystem.config.cjs
 ```
 
 ---
