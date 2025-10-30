@@ -62,7 +62,7 @@ hono-app/
 ├── docker-compose.yml           # Docker Compose 설정
 ├── .dockerignore                # Docker 빌드 제외 파일
 │
-├── ecosystem.config.cjs         # PM2 프로세스 관리 설정 (Bun + reusePort)
+├── ecosystem.config.js          # PM2 프로세스 관리 설정 (Bun + reusePort)
 │
 ├── scripts/                     # Ubuntu/Debian 배포 스크립트 (apt)
 │   ├── install-docker.sh        # Docker 설치 스크립트
@@ -204,7 +204,7 @@ cd /home/ubuntu/hono-app
 
 ```bash
 # 시작
-pm2 start ecosystem.config.cjs
+pm2 start ecosystem.config.js
 
 # 상태 확인
 pm2 status
@@ -213,7 +213,7 @@ pm2 status
 pm2 logs
 
 # 재시작
-pm2 reload ecosystem.config.cjs
+pm2 reload ecosystem.config.js
 
 # 중지
 pm2 stop hono-app
@@ -397,7 +397,7 @@ process.on("unhandledRejection", (reason, promise) => {
 **PM2와의 호환성:**
 
 - `pm2 reload` 명령 시 무중단 재시작 가능
-- `ecosystem.config.cjs`의 `wait_ready`, `kill_timeout` 설정과 연동
+- `ecosystem.config.js`의 `wait_ready`, `kill_timeout` 설정과 연동
 
 **구현 위치:** `server.ts:91-114`
 
@@ -438,7 +438,7 @@ bun build server.ts --outdir=dist --minify --target=bun
 
 Bun은 PM2 cluster 모드를 지원하지 않지만, `reusePort: true`로 멀티 프로세스 로드 밸런싱이 가능합니다 (Linux만).
 
-**설정:** `ecosystem.config.cjs`
+**설정:** `ecosystem.config.js`
 
 ```javascript
 instances: 2,        // 인스턴스 개수 (Linux에서 reusePort와 함께 사용)
@@ -487,7 +487,7 @@ curl -X POST http://localhost:4000/api/posts \
 - [멀티 플랫폼 Docker 가이드](./README_MULTI_PLATFORM.md)
 - [Bun reusePort 클러스터링 가이드](./README_BUN_REUSEPORT.md)
 - [Amazon Linux 2023 배포 가이드](./scripts-dnf/README.md)
-- [PM2 설정](./ecosystem.config.cjs)
+- [PM2 설정](./ecosystem.config.js)
 
 ### 관련 리소스
 
